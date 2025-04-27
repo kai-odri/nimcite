@@ -7,17 +7,18 @@ proc showHelp() =
 nimcite - Harvard Referencing CLI tool
 
 Usage:
-  nimcite --journal (-j)              Add a journal article reference
-  nimcite --book (-b)                 Add a book reference
-  nimcite --website (-w)              Add a website reference
-  nimcite --news (-n)                 Add a news article reference
-  nimcite --thesis (-t)               Add a thesis/dissertation reference
-  nimcite --video (-v)                Add an online video reference
-  nimcite --export (-e)                       Export all saved references
-    nimcite --export <format> <filename>      # format = markdown (md) / html / txt
-  nimcite --file (-f) <filename>              Specify reference file (default: references.json)
-  nimcite --merge (-m) <file1> <file2> ...    Merge a number of reference files into file1
-  nimcite --help (-h)                         Show this help message
+  --journal (-j)              Add a journal article reference
+  --book (-b)                 Add a book reference
+  --website (-w)              Add a website reference
+  --news (-n)                 Add a news article reference
+  --thesis (-t)               Add a thesis/dissertation reference
+  --video (-v)                Add an online video reference
+  --export (-e)                       Export all saved references
+    --export <format> <filename>      # format = markdown (md) / html / txt
+  --print (-p)
+  --file (-f) <filename>              Specify reference file (default: references.json)
+  --merge (-m) <file1> <file2> ...    Merge a number of reference files into file1
+  --help (-h)                         Show this help message
 """
 
 proc main() =
@@ -71,6 +72,10 @@ proc main() =
       if i + 1 < opts.len: format = opts[i + 1]
       if i + 2 < opts.len: outFile = opts[i + 2]
       exportRefs(refFile, format, outFile)
+      quit(0)
+
+    of "--print", "-p":
+      printRefs(refFile)
       quit(0)
 
     of "--help", "-h":

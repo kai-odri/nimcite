@@ -5,19 +5,55 @@ type
     rtype*: string
     citation*: string
     inline*: string
-const refFile* = "references.json"
 
 proc mergeReferenceFiles*(files: seq[string]) =
   discard
 
-proc exportRefs*(exportTo: string, format: string, exportFile: string) =
-  if not fileExists(refFile):
+proc exportRefs*(refFile: string, format: string, exportFile: string) =
+y  if not fileExists(refFile):
     echo "No references to export."
     return
   let content = readFile(refFile)
+  var references: seq[Reference]
+  try:
+    references = parseJson(content).to(seq[Reference])
+  except:
+    echo "Error parsing references file."
+    quit(1)
+  var output = ""
+  case format.toLowerAscii()
+  of "txt":
+    for reference in references:
+      output.add(reference.citation & "\n\n")
+  of "md", "markdown":
+    for reference in references:
+      output.add("* " & reference.citation & "\n")
+  of "html":
+    output.add("<html><body><ul>\n")
+    for reference in references:
+      output.add("<li>" & reference.citation.replace("*", "<i>").replace("*", "</i>") & "</li>\n")
+    output.add("</ul></body></html>\n")
+  else:
+    echo "Unknown export format: ", format
+    quit(1)
+  if exportTo == "file":
+    writeFile(exportFile, output)
+    echo "Exported to ", exportFile
+  else:
+    echo output
+
+proc printRefs*(refFile: string)
+  if not fileExists(refFile):
+    echo "No references to print."
+    return
+  let content = readFile(refFile)
   let references = parseJson(content).to(seq[Reference])
+  var counter = 1
   for reference in references:
-    echo reference.citation
+    echo """Reference {counter} is {reference.rtype}:
+    {reference.citation}
+    {reference.inline
+    """
 
 
 proc saveReference(reference : Reference, refFile: string) =
@@ -80,7 +116,11 @@ proc parseBook*(refFile: string) =
   let inline = fmt"({author}, {year})"
   let reference = Reference(rtype: "book", citation: citation, inline: inline)
   saveReference(reference, refFile)
-  echo "Reference saved."
+  echo """Saved:
+Type: {rtype}
+Reference: {citation}
+Inline: {inline}
+  """
 
 proc parseWebsite*(refFile: string) =
   echo "Adding a website reference..."
@@ -100,7 +140,11 @@ proc parseWebsite*(refFile: string) =
 
   let reference = Reference(rtype: "website", citation: citation, inline: inline)
   saveReference(reference, refFile)
-  echo "Reference saved."
+  echo """Saved:
+Type: {rtype}
+Reference: {citation}
+Inline: {inline}
+  """
 
 proc parseNews*(refFile: string) =
   echo "Adding a news article reference..."
@@ -123,7 +167,11 @@ proc parseNews*(refFile: string) =
 
   let reference = Reference(rtype: "news", citation: citation, inline: inline)
   saveReference(reference, refFile)
-  echo "Reference saved."
+  echo """Saved:
+Type: {rtype}
+Reference: {citation}
+Inline: {inline}
+  """
 
 proc parseThesis*(refFile: string) =
   echo "Adding a thesis reference..."
@@ -143,7 +191,11 @@ proc parseThesis*(refFile: string) =
 
   let reference = Reference(rtype: "thesis", citation: citation, inline: inline)
   saveReference(reference, refFile)
-  echo "Reference saved."
+  echo """Saved:
+Type: {rtype}
+Reference: {citation}
+Inline: {inline}
+  """
 
 proc parseVideo*(refFile: string) =
   echo "Adding a video reference..."
@@ -165,4 +217,9 @@ proc parseVideo*(refFile: string) =
 
   let reference = Reference(rtype: "video", citation: citation, inline: inline)
   saveReference(reference, refFile)
-  echo "Reference saved."
+  echo """Saved:
+Type: {rtype}
+Reference: {citation}
+Inline: {inline}
+  """
+
