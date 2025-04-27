@@ -7,7 +7,10 @@ type
     inline*: string
 const refFile* = "references.json"
 
-proc exportRefs*(exportTo: string, exportFile: string) =
+proc mergeReferenceFiles*(files: seq[string]) =
+  discard
+
+proc exportRefs*(exportTo: string, format: string, exportFile: string) =
   if not fileExists(refFile):
     echo "No references to export."
     return
@@ -17,7 +20,7 @@ proc exportRefs*(exportTo: string, exportFile: string) =
     echo reference.citation
 
 
-proc saveReference(reference: Reference) =
+proc saveReference(reference : Reference, refFile: string) =
   var references: seq[Reference] = @[]
   if fileExists(refFile):
     let content = readFile(refFile)
@@ -28,7 +31,7 @@ proc saveReference(reference: Reference) =
   writeFile(refFile, jsonStr)
 
 
-proc parseJournal*() =
+proc parseJournal*(refFile: string) =
   echo("Adding a journal reference...")
   echo("Author(s): ")
   let author = stdin.readLine()
@@ -49,14 +52,14 @@ proc parseJournal*() =
   let inline = fmt"({author}, {year})"
 
   let reference = Reference(rtype: "journal", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo """Saved:
 Type: {rtype}
 Reference: {citation}
 Inline: {inline}
   """
 
-proc parseBook*() =
+proc parseBook*(refFile: string) =
   echo "Adding a book reference..."
   stdout.write("Author(s): ")
   let author = stdin.readLine()
@@ -76,10 +79,10 @@ proc parseBook*() =
 
   let inline = fmt"({author}, {year})"
   let reference = Reference(rtype: "book", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo "Reference saved."
 
-proc parseWebsite*() =
+proc parseWebsite*(refFile: string) =
   echo "Adding a website reference..."
   stdout.write("Author(s) or Organisation: ")
   let author = stdin.readLine()
@@ -96,10 +99,10 @@ proc parseWebsite*() =
   let inline = fmt"({author}, {year})"
 
   let reference = Reference(rtype: "website", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo "Reference saved."
 
-proc parseNews*() =
+proc parseNews*(refFile: string) =
   echo "Adding a news article reference..."
   stdout.write("Author(s): ")
   let author = stdin.readLine()
@@ -119,10 +122,10 @@ proc parseNews*() =
   let inline = fmt"({author}, {year})"
 
   let reference = Reference(rtype: "news", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo "Reference saved."
 
-proc parseThesis*() =
+proc parseThesis*(refFile: string) =
   echo "Adding a thesis reference..."
   stdout.write("Author: ")
   let author = stdin.readLine()
@@ -139,10 +142,10 @@ proc parseThesis*() =
   let inline = fmt"({author}, {year})"
 
   let reference = Reference(rtype: "thesis", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo "Reference saved."
 
-proc parseVideo*() =
+proc parseVideo*(refFile: string) =
   echo "Adding a video reference..."
   stdout.write("Uploader/Author: ")
   let author = stdin.readLine()
@@ -161,5 +164,5 @@ proc parseVideo*() =
   let inline = fmt"({author}, {year})"
 
   let reference = Reference(rtype: "video", citation: citation, inline: inline)
-  saveReference(reference)
+  saveReference(reference, refFile)
   echo "Reference saved."

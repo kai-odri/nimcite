@@ -7,58 +7,80 @@ proc showHelp() =
 nimcite - Harvard Referencing CLI tool
 
 Usage:
-  nimcite --journal (-j)            Add a journal article reference
-  nimcite --book (-b)               Add a book reference
-  nimcite --website (-w)            Add a website reference
-  nimcite --news (-n)               Add a news article reference
-  nimcite --thesis (-t)             Add a thesis/dissertation reference
-  nimcite --video (-v)              Add an online video reference
-  nimcite --export (-e)             Export all saved references
-    nimcite --export <format> <filename> #filename defaults to "exported-refs"
-    format = markdown (md) / html / txt #defaults to txt
-  nimcite --help (-h)               Show this help message
+  nimcite --journal (-j)              Add a journal article reference
+  nimcite --book (-b)                 Add a book reference
+  nimcite --website (-w)              Add a website reference
+  nimcite --news (-n)                 Add a news article reference
+  nimcite --thesis (-t)               Add a thesis/dissertation reference
+  nimcite --video (-v)                Add an online video reference
+  nimcite --export (-e)                       Export all saved references
+    nimcite --export <format> <filename>      # format = markdown (md) / html / txt
+  nimcite --file (-f) <filename>              Specify reference file (default: references.json)
+  nimcite --merge (-m) <file1> <file2> ...    Merge a number of reference files into file1
+  nimcite --help (-h)                         Show this help message
 """
 
 proc main() =
-  let opts = commandLineParams()
-  if opts.len == 0 or opts[0] in ["--help", "-h"]:
-    showHelp()
-    quit(0)
+  var refFile = "references.json"
+  var opts = commandLineParams()
+  var i = 0
 
-  case opts[0]
-  of "--journal", "-j":
-    parseJournal()
-  of "--book", "-b":
-    parseBook()
-  of "--website", "-w":
-    parseWebsite()
-  of "--news", "-n":
-    parseNews()
-  of "--thesis", "-t":
-    parseThesis()
-  of "--video", "-v":
-    parseVideo()
-  of "--export", "-e":
-    var exportFile = "exported-refs"
-    if opts.len == 3:
-      exportFile = opts[2]
-      case opts[1]
-      of "txt", "":
-        exportRefs("txt", exportFile)
-      of "markdown", "md":
-        exportRefs("md", exportFile)
-      of "html":
-        exportRefs("html", exportFile)
+  while i < opts.len:
+    case opts[i]
+    of "--file", "-f":
+      if i + 1 < opts.len:
+        refFile = opts[i + 1]
+        i += 2
       else:
-        echo "Unknown args"
-        showHelp()
+        echo "Missing filename for --file"
         quit(1)
-  of "--help", "-h":
-    showHelp()
-  else:
-    echo "Unknown command: ", opts[0]
-    showHelp()
-    quit(1)
+
+    of "--merge", "-m":
+      if i + 2 < opts.len:
+        var filesToMerge: seq[string] = @[]
+        for j in i..opts.len:
+          filesToMerge.add(opts[j])
+        mergeReferenceFiles(filesToMerge)
+        quit(0)
+      else:
+        echo "Usage: --merge <file1> <file2>"
+        quit(1)
+
+    of "--journal", "-j":
+      parseJournal(refFile)
+      quit(0)
+    of "--book", "-b":
+      parseBook(refFile)
+      quit(0)
+    of "--website", "-w":
+      parseWebsite(refFile)
+      quit(0)
+    of "--news", "-n":
+      parseNews(refFile)
+      quit(0)
+    of "--thesis", "-t":
+      parseThesis(refFile)
+      quit(0)
+    of "--video", "-v":
+      parseVideo(refFile)
+      quit(0)
+
+    of "--export", "-e":
+      var format = "txt"
+      var outFile = "exported-refs"
+      if i + 1 < opts.len: format = opts[i + 1]
+      if i + 2 < opts.len: outFile = opts[i + 2]
+      exportRefs(refFile, format, outFile)
+      quit(0)
+
+    of "--help", "-h":
+      showHelp()
+      quit(0)
+
+    else:
+      echo "Unknown command: ", opts[i]
+      showHelp()
+      quit(1)
+  
 
 main()
-
